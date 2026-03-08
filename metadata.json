@@ -1,0 +1,5 @@
+{
+  "name": "Graph Viewer",
+  "description": "A simple dashboard to view graph.png and graph2.png.",
+  "requestFramePermissions": []
+}
