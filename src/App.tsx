@@ -1,170 +1,222 @@
-import { motion } from "motion/react";
-import { Maximize2, Download, Share2, BarChart3, TrendingUp, Info } from "lucide-react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
+import { Maximize2, Download, Share2, BarChart3, TrendingUp, ArrowDown, Info } from "lucide-react";
+
+function ImageSection({ graph }: any) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [0.8, 1]);
+
+  return (
+    <section ref={ref} className="relative h-screen flex items-center justify-center overflow-hidden">
+      {/* Background Parallax Image */}
+      <div className="absolute inset-0 z-0">
+        <motion.div style={{ y }} className="relative w-full h-[130%]">
+          <img
+            src={graph.src}
+            alt={graph.title}
+            className="w-full h-full object-cover opacity-40 grayscale hover:grayscale-0 transition-all duration-1000"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${graph.id}/1920/1080?grayscale`;
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-transparent to-zinc-950" />
+        </motion.div>
+      </div>
+
+      {/* Content Overlay */}
+      <motion.div 
+        style={{ opacity, scale }}
+        className="relative z-10 max-w-5xl w-full px-6 flex flex-col lg:flex-row gap-12 items-center"
+      >
+        <div className="w-full lg:w-2/3 shadow-2xl shadow-emerald-500/10 rounded-3xl overflow-hidden border border-white/10 group">
+          <div className="relative aspect-[16/9]">
+            <img
+              src={graph.src}
+              alt={graph.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${graph.id}/1200/675`;
+              }}
+            />
+            <div className="absolute inset-0 bg-zinc-950/20 group-hover:bg-transparent transition-colors duration-500" />
+          </div>
+        </div>
+
+        <div className="w-full lg:w-1/3 space-y-6 text-center lg:text-left">
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <p className="text-emerald-500 font-mono text-xs tracking-[0.3em] uppercase mb-4">{graph.subtitle}</p>
+            <h2 className="text-5xl md:text-6xl font-black tracking-tighter leading-none mb-6 uppercase italic">
+              {graph.title.split(' ').map((word: string, i: number) => (
+                <span key={i} className={i === 0 ? "text-white" : "text-emerald-500"}>
+                  {word}{' '}
+                </span>
+              ))}
+            </h2>
+            <p className="text-zinc-400 text-lg leading-relaxed mb-8">
+              {graph.description}
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              <button className="flex items-center gap-2 px-6 py-3 bg-white text-zinc-950 font-bold rounded-full hover:bg-emerald-500 transition-all active:scale-95">
+                <Maximize2 className="w-4 h-4" />
+                <span>EXPAND</span>
+              </button>
+              <button className="p-3 border border-white/20 rounded-full hover:bg-white/10 transition-all">
+                <Download className="w-5 h-5" />
+              </button>
+              <button className="p-3 border border-white/20 rounded-full hover:bg-white/10 transition-all">
+                <Share2 className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
 
 export default function App() {
   const graphs = [
     { 
       id: "graph1", 
-      title: "主要データ分析", 
-      subtitle: "Primary Data Analysis",
+      title: "CORE ANALYSIS", 
+      subtitle: "Strategic Insight 01",
       src: "/graph.jpg", 
-      description: "期間別の推移と主要な指標の相関を示しています。データの連続性と特異点を明確に可視化しました。" 
+      description: "データの深層に潜むパターンを抽出し、ビジネスの意思決定を加速させるための核心的な分析結果です。" 
     },
     { 
       id: "graph2", 
-      title: "トレンド予測", 
-      subtitle: "Trend Forecasting",
+      title: "FUTURE TRENDS", 
+      subtitle: "Strategic Insight 02",
       src: "/graph2.jpg", 
-      description: "将来の予測値と現状の乖離を可視化しています。機械学習モデルに基づいた高精度な予測結果です。" 
+      description: "市場の動向を予測し、次なる一手を見極めるためのトレンド予測。未来を形作るための羅針盤となります。" 
     },
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30">
-      {/* Immersive Background Gradient */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[25%] -left-[10%] w-[70%] h-[70%] bg-emerald-900/10 blur-[120px] rounded-full" />
-        <div className="absolute -bottom-[25%] -right-[10%] w-[70%] h-[70%] bg-blue-900/10 blur-[120px] rounded-full" />
-      </div>
-
-      {/* Navigation */}
-      <nav className="relative z-10 border-b border-white/5 bg-zinc-950/50 backdrop-blur-md sticky top-0">
-        <div className="max-w-screen-2xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div className="bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30">
+      {/* Fixed Header */}
+      <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
+        <div className="max-w-screen-2xl mx-auto px-8 h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <BarChart3 className="w-5 h-5 text-zinc-950" />
-            </div>
-            <span className="text-xl font-bold tracking-tight uppercase italic">Visual Insight</span>
+            <BarChart3 className="w-6 h-6 text-white" />
+            <span className="text-2xl font-black tracking-tighter uppercase italic">VISUAL.DATA</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400 uppercase tracking-widest">
-            <a href="#" className="hover:text-white transition-colors">Archive</a>
-            <a href="#" className="hover:text-white transition-colors">Reports</a>
-            <a href="#" className="hover:text-white transition-colors">Settings</a>
+          <div className="flex items-center gap-12 text-[10px] font-bold uppercase tracking-[0.4em]">
+            <span className="text-zinc-500">2026 EDITION</span>
+            <button className="px-6 py-2 border border-white/30 rounded-full hover:bg-white hover:text-black transition-all">
+              MENU
+            </button>
           </div>
         </div>
       </nav>
 
-      <main className="relative z-10 max-w-screen-2xl mx-auto px-6 py-16">
-        {/* Hero Section */}
-        <header className="mb-24 text-center md:text-left">
-          <motion.div
+      {/* Hero Intro */}
+      <section className="relative h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2 }}
+          className="absolute inset-0 z-0"
+        >
+          <div className="absolute inset-0 bg-zinc-950/60 z-10" />
+          <img 
+            src="/graph.jpg" 
+            className="w-full h-full object-cover blur-sm opacity-30" 
+            onError={(e) => (e.target as HTMLImageElement).src = "https://picsum.photos/seed/hero/1920/1080?blur=10"}
+          />
+        </motion.div>
+
+        <div className="relative z-10">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-emerald-500 font-mono text-sm tracking-[0.5em] uppercase mb-8"
+          >
+            Digital Exhibition
+          </motion.p>
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ delay: 0.7, duration: 1 }}
+            className="text-7xl md:text-[12rem] font-black tracking-tighter leading-none uppercase mb-12"
           >
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 uppercase leading-none">
-              Data <span className="text-emerald-500">Exhibition</span>
-            </h1>
-            <p className="text-zinc-400 text-lg md:text-xl max-w-3xl leading-relaxed">
-              複雑な数値を視覚的な芸術へと昇華。
-              最新の分析結果を、最も美しい形でここに提示します。
+            THE <br /> <span className="text-emerald-500">VISION</span>
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+            className="flex flex-col items-center gap-4"
+          >
+            <p className="text-zinc-400 max-w-md text-sm uppercase tracking-widest leading-loose">
+              Scroll to explore the intersection of <br /> raw data and visual aesthetics.
             </p>
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="mt-12"
+            >
+              <ArrowDown className="w-6 h-6 text-emerald-500" />
+            </motion.div>
           </motion.div>
-        </header>
-
-        {/* Stats Grid - Minimalist */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-24">
-          {[
-            { label: "Total Analysis", value: "24", icon: BarChart3 },
-            { label: "Growth Rate", value: "+12.5%", icon: TrendingUp },
-            { label: "System Status", value: "Optimal", icon: Info },
-            { label: "Last Update", value: "Today", icon: Maximize2 },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.1 }}
-              className="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-sm"
-            >
-              <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-2">{stat.label}</p>
-              <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
-            </motion.div>
-          ))}
         </div>
+      </section>
 
-        {/* Gallery Section - Emphasized Photos */}
-        <section className="space-y-32">
-          {graphs.map((graph, i) => (
-            <motion.div
-              key={graph.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className={`flex flex-col ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 items-center`}
-            >
-              {/* Image Container - The Focus */}
-              <div className="w-full lg:w-3/5 group relative">
-                <div className="absolute -inset-4 bg-emerald-500/10 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                <div className="relative aspect-[16/10] bg-zinc-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-                  <img
-                    src={graph.src}
-                    alt={graph.title}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${graph.id}/1200/750?grayscale`;
-                    }}
-                  />
-                  {/* Overlay Controls */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
-                    <div className="flex gap-4">
-                      <button className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full transition-all">
-                        <Maximize2 className="w-5 h-5" />
-                      </button>
-                      <button className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full transition-all">
-                        <Download className="w-5 h-5" />
-                      </button>
-                      <button className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full transition-all">
-                        <Share2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* Image Sections */}
+      {graphs.map((graph, i) => (
+        <ImageSection key={graph.id} graph={graph} index={i} />
+      ))}
 
-              {/* Text Content */}
-              <div className="w-full lg:w-2/5 space-y-6">
-                <div>
-                  <p className="text-emerald-500 font-mono text-sm tracking-widest uppercase mb-2">{graph.subtitle}</p>
-                  <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">{graph.title}</h2>
-                </div>
-                <div className="h-px w-24 bg-emerald-500/50" />
-                <p className="text-zinc-400 text-lg leading-relaxed">
-                  {graph.description}
-                </p>
-                <div className="pt-4">
-                  <button className="px-8 py-4 bg-white text-zinc-950 font-bold rounded-full hover:bg-emerald-500 transition-colors duration-300 uppercase tracking-widest text-xs">
-                    View Full Report
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 bg-zinc-950 py-20 mt-32">
-        <div className="max-w-screen-2xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-12">
-          <div className="text-center md:text-left">
-            <div className="flex items-center gap-3 mb-6 justify-center md:justify-start">
-              <div className="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center">
-                <BarChart3 className="w-4 h-4 text-zinc-950" />
-              </div>
-              <span className="text-lg font-bold uppercase italic tracking-tight">Visual Insight</span>
-            </div>
-            <p className="text-zinc-500 text-sm max-w-xs">
-              データと美学の融合。次世代のインサイトプラットフォーム。
+      {/* Stats Summary - Minimalist Footer Style */}
+      <section className="py-32 px-6 border-t border-white/5">
+        <div className="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-24">
+          <div>
+            <h4 className="text-emerald-500 font-mono text-xs tracking-widest uppercase mb-8">The Mission</h4>
+            <p className="text-zinc-400 leading-relaxed">
+              私たちは、単なる数字の羅列を、誰もが直感的に理解できる「視覚的な物語」へと変換します。
+              データは、正しく提示されたとき、それ自体が芸術となります。
             </p>
           </div>
-          <div className="flex gap-12 text-xs font-mono uppercase tracking-widest text-zinc-500">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+          <div className="flex flex-col gap-8">
+            <div className="flex items-end gap-4">
+              <span className="text-6xl font-black tracking-tighter">24</span>
+              <span className="text-zinc-500 uppercase text-xs tracking-widest mb-2">Projects Analyzed</span>
+            </div>
+            <div className="flex items-end gap-4">
+              <span className="text-6xl font-black tracking-tighter text-emerald-500">12.5%</span>
+              <span className="text-zinc-500 uppercase text-xs tracking-widest mb-2">Efficiency Growth</span>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h4 className="text-emerald-500 font-mono text-xs tracking-widest uppercase mb-8">Contact</h4>
+            <p className="text-zinc-100 font-bold text-xl tracking-tight">hello@visual-insight.data</p>
+            <div className="flex gap-6 pt-4">
+              <TrendingUp className="w-5 h-5 text-zinc-500" />
+              <Info className="w-5 h-5 text-zinc-500" />
+              <Share2 className="w-5 h-5 text-zinc-500" />
+            </div>
           </div>
         </div>
+      </section>
+
+      <footer className="py-12 px-8 border-t border-white/5 text-center">
+        <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-zinc-600">
+          © 2026 VISUAL DATA EXHIBITION / ALL RIGHTS RESERVED
+        </p>
       </footer>
     </div>
   );
