@@ -106,7 +106,7 @@ export default function App() {
   ];
 
   return (
-    <div className="bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30">
+    <div className="relative bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30">
       {/* Fixed Header */}
       <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
         <div className="max-w-screen-2xl mx-auto px-8 h-24 flex items-center justify-between">
